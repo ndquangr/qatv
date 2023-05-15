@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sysManage.roleManage.roleManageDAO">
+
+	<!-- 시스템공통코드 조회 -->
+	<select id="getListRoleCode" parameterType="map" resultType="HashMap">
+		SELECT A.ROL_MNG_ID
+			 , A.ROL_MNG_NM
+			 , A.RGST_DTTM
+			 , IFNULL(B.GROUP_MEMBERS, 0) AS GROUP_MEMBERS
+		  FROM CMTN_ROL_INFO A
+			 , (SELECT ROL_MNG_ID
+	                 , COUNT(*) AS GROUP_MEMBERS
+	              FROM CMTN_USER_ROL
+	             GROUP BY ROL_MNG_ID) B
+		 WHERE A.ROL_MNG_ID = B.ROL_MNG_ID
+		 ORDER BY A.ROL_LEVL
+	</select>
+	
+	<select id="getUserDetailRole" parameterType="map" resultType="HashMap">
+		SELECT USER_ID,ROL_MNG_ID 
+		FROM CMTN_USER_ROL
+		WHERE USER_ID = #{user_id}
+	</select>
+
+	<insert id="insertRole" parameterType="map">
+		INSERT INTO CMTN_ROL_INFO
+		(
+			  ROL_MNG_ID
+			, ROL_MNG_NM
+			, RGST_DTTM
+		)
+		VALUES
+		(
+			  #{rol_mng_id}
+			, #{rol_mng_nm}
+			, now()  
+		)
+	</insert>
+
+	<update id="updateRole" parameterType="map">
+		UPDATE CMTN_ROL_INFO
+		SET
+			ROL_MNG_NM = #{rol_mng_nm}
+		WHERE ROL_MNG_ID = #{rol_mng_id}
+	</update>
+
+	<delete id="deleteRole" parameterType="map">
+		DELETE FROM CMTN_ROL_INFO
+		WHERE ROL_MNG_ID = #{rol_mng_id}
+	</delete>
+
+	<!-- 권한코드 중복 체크 -->
+	<select id="getRolMngIdCnt" resultType="int" parameterType="map">
+		SELECT
+			COUNT(*)
+		FROM 
+			CMTN_ROL_INFO
+		WHERE ROL_MNG_ID = #{rol_mng_id}
+	</select>
+</mapper>

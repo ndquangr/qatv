@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+	"-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+	"http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+	<!-- <definition name="index" extends="baseLayout">
+		<put-attribute name="title" value="Menu" />
+		<put-attribute name="body" value="/WEB-INF/views/main-menu.jsp" />
+	</definition>
+	
+	<definition name="login" extends="baseLayout">
+		<put-attribute name="title" value="Login" />
+		<put-attribute name="navi" value="/WEB-INF/views/template/login-navi.jsp" />
+		<put-attribute name="body" value="/WEB-INF/views/login.jsp" />
+	</definition>
+
+	<definition name="userManager" extends="baseLayout">
+		<put-attribute name="title" value="User Management" />
+		<put-attribute name="body" value="/WEB-INF/views/user-management.jsp" />
+	</definition>
+
+	<definition name="licenseManager" extends="baseLayout">
+		<put-attribute name="title" value="License Management" />
+		<put-attribute name="body" value="/WEB-INF/views/license-management.jsp" />
+	</definition>
+
+	<definition name="addUser" extends="baseLayout">
+		<put-attribute name="title" value="User Registration" />
+		<put-attribute name="body" value="/WEB-INF/views/user-registration.jsp" />
+	</definition>
+	
+	<definition name="editUser" extends="addUser">
+		<put-attribute name="title" value="Edit User Registration" />
+	</definition>
+
+	<definition name="addLicense" extends="baseLayout">
+		<put-attribute name="title" value="License Registration" />
+		<put-attribute name="body" value="/WEB-INF/views/license-registration.jsp" />
+	</definition>
+	
+	<definition name="editLicense" extends="addLicense">
+		<put-attribute name="title" value="Edit license Registration" />
+	</definition> -->
+	
+	<definition name="sys:*/*/*" extends="baseLayout">
+		<put-attribute name="title" value="Login" />
+		<put-attribute name="navi" value="/WEB-INF/views/template/login-navi.jsp" />
+		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}/{3}.jsp" />
+	</definition>
+	
+	<definition name="popup:*/*/*" extends="popupLayout">
+		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}/{3}.jsp" />
+	</definition>
+
+	<definition name="authForm" extends="baseLayout">
+		<put-attribute name="title" value="Login" />
+		<!-- <put-attribute name="navi" value="/WEB-INF/views/template/login-navi.jsp" /> -->
+		<put-attribute name="body" value="/WEB-INF/views/authForm.jsp" />
+	</definition>
+</tiles-definitions>

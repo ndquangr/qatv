@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sysManage.userRoleManage.userRoleManageDAO">
+	<select id="getRoleAdminList" resultType="java.lang.String">
+		SELECT 
+            SUBSTR((XMLAGG(XMLELEMENT(x, NVL(EML,'no')||','||USER_NM||','||NVL(CLPN1||CLPN2||CLPN3,'no')||',') ORDER BY cui.USER_ID).EXTRACT('//text()').GetStringVal()), 1, 
+                    LENGTH((XMLAGG(XMLELEMENT(x, NVL(EML,'no')||','||USER_NM||','||NVL(CLPN1||CLPN2||CLPN3,'no')||',') ORDER BY cui.USER_ID).EXTRACT('//text()').GetStringVal()))-1)
+        FROM CMTN_USER_INFO cui
+        WHERE USER_ID = cui.USER_ID
+        AND USER_ID IN (SELECT USER_ID FROM CMTN_USER_ROL WHERE ROL_MNG_ID = 'ROLE_ADMIN')
+	</select>
+
+	<insert id="insert" parameterType="map">
+		INSERT INTO CMTN_USER_ROL
+		(
+			  USER_ID
+			, ROL_MNG_ID
+			, RGST_DTTM
+		)
+		VALUES
+		(
+			  #{user_id}
+			, #{rol_mng_id}
+			, now()  
+		)
+	</insert>
+	
+	<update id="update" parameterType="map">
+		UPDATE CMTN_USER_ROL
+		SET ROL_MNG_ID = #{rol_mng_id}
+		WHERE USER_ID = #{user_id}
+	</update>
+	
+	<delete id="delete" parameterType="map">
+		DELETE FROM CMTN_USER_ROL
+		WHERE USER_ID = #{user_id}
+	</delete>
+
+	<!-- CMS 신청관리, 게시글관리 권한 조회 -->
+	<select id="getRolCnt" parameterType="map" resultType="map">
+		SELECT 
+			<foreach collection="bbslist" item="item" separator=",">
+			(SELECT COUNT(*) FROM CMTN_BBS_CHRG_CONF WHERE BBS_UNIQ_ID = #{item} AND USER_ID = #{USER_ID}) AS ${item}
+			</foreach>
+		FROM DUAL
+	</select>
+
+</mapper>

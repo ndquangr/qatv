@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-4.1.xsd">
+
+    <global-method-security pre-post-annotations="enabled"/>
+
+    <http auto-config='true' use-expressions="true">
+        <access-denied-handler error-page="/noAuthorized"/>
+        <csrf disabled="true"/>
+
+        <headers>
+            <frame-options policy="SAMEORIGIN"/>
+            <hsts disabled="true"/>
+        </headers>
+
+        <!-- local server Setting Start -->
+        <intercept-url pattern="/sys/**" access="hasAnyRole('ROLE_ADMIN')"/><!--관리자 페이지 전체 -->
+        <intercept-url pattern="/staff/**" access="hasAnyRole('ROLE_ADMIN', 'ROLE_STAFF')"/><!--관리자 페이지 전체 -->
+        <!-- local server Setting End -->
+
+        <!-- 로그인 페이지를 따로 작성하여 연결 -->
+        <form-login login-page="/pageAuth"
+                             login-processing-url="/login"
+                             username-parameter="id"
+                             password-parameter="password"
+                             authentication-failure-url="/loginfailed"
+                             authentication-success-handler-ref="LoginSuccessHandler"/>
+
+        <!-- 1인 로그인 되도록 (기존세션 만료) -->
+        <session-management>
+            <concurrency-control max-sessions="1" error-if-maximum-exceeded="true"/>
+        </session-management>
+
+        <!--  로그아웃 시 페이지 설정 -->
+        <logout logout-url="/logout" success-handler-ref="LogoutSuccessHandler"/>
+
+    </http>
+
+    <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider user-service-ref="myUserDetailsService">
+            <password-encoder ref="passwordEncoder"/>
+        </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="myUserDetailsService" class="com.ndquangr.qatv.authen.MyUserDetailsService">
+        <beans:property name="myDao">
+            <beans:bean class="com.ndquangr.qatv.authen.MyDao">
+                <beans:property name="dataSource" ref="dataSource"/>
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
+
+    <beans:bean id="LoginSuccessHandler" class="com.ndquangr.qatv.authen.LoginSuccessHandler"/>
+    <beans:bean id="LogoutSuccessHandler" class="com.ndquangr.qatv.authen.LogoutSuccessHandler"/>
+</beans:beans>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE tiles-definitions PUBLIC  
+        "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"  
+        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+	<definition name="baseLayout" template="/WEB-INF/views/template/pages.jsp">
+		<put-attribute name="title" value="License Management" />
+		<put-attribute name="header" value="/WEB-INF/views/template/header.jsp" />
+		<put-attribute name="navi" value="/WEB-INF/views/template/navi.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer" value="/WEB-INF/views/template/footer.jsp" />
+	</definition>
+	
+	<definition name="popupLayout" template="/WEB-INF/views/template/emptypages.jsp">
+		<put-attribute name="title" value="Popup" />
+		<put-attribute name="body" value="" />
+	</definition>
+
+	<definition name="error" extends="baseLayout">
+		<put-attribute name="title" value="Error" />
+		<put-attribute name="body" value="/WEB-INF/views/error.jsp" />
+	</definition>
+	
+</tiles-definitions>

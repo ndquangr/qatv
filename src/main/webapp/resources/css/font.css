@@ -1,0 +1,61 @@
+/*@import url(https://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+/*@import url(http://fonts.googleapis.com/earlyaccess/notosanskr.css);;*/
+
+@font-face {
+  font-family: 'NanumBarunGothic';
+  src: url('/resources/css/fonts/NanumBarunGothic.eot');
+  src: url(/resources/css/fonts/NanumBarunGothic.eot?#iefix) format('embedded-opentype'),
+       url(/resources/css/fonts/NanumBarunGothic.woff) format('woff'),
+       url(/resources/css/fonts/NanumBarunGothic.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'NanumBarunGothicBold';
+  src: url('/resources/css/fonts/NanumBarunGothicBold.eot');
+  src: url(/resources/css/fonts/NanumBarunGothicBold.eot?#iefix) format('embedded-opentype'),
+       url(/resources/css/fonts/NanumBarunGothicBold.woff) format('woff'),
+       url(/resources/css/fonts/NanumBarunGothicBold.ttf) format('truetype');
+}
+@font-face { 
+     font-family: 'OpenSans'; 
+     src: url('/resources/css/fonts/OpenSans-Regular.eot'); 
+     src: url('/resources/css/fonts/OpenSans-Regular.eot?#iefix') format('embedded-opentype'), 
+          url('/resources/css/fonts/OpenSans-Regular.woff') format('woff'), 
+          url('/resources/css/fonts/OpenSans-Regular.ttf') format('truetype'), 
+          url('/resources/css/fonts/OpenSans-Regular.svg#OpenSansRegular') format('svg'); 
+     font-weight: normal; 
+     font-style: normal; 
+ }
+ @font-face { 
+     font-family: 'OpenSansbold'; 
+     src: url('/resources/css/fonts/OpenSans-Semibold.eot'); 
+     src: url('/resources/css/fonts/OpenSans-Semibold.eot?#iefix') format('embedded-opentype'), 
+          url('/resources/css/fonts/OpenSans-Semibold.woff') format('woff'), 
+          url('/resources/css/fonts/OpenSans-Semibold.ttf') format('truetype'), 
+          url('/resources/css/fonts/OpenSans-Semibold.svg#OpenSansRegular') format('svg'); 
+     font-weight: normal; 
+     font-style: normal; 
+ }
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url('/resources/css/fonts/glyphicons-halflings-regular.eot');
+  src: url('/resources/css/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), 
+	  url('/resources/css/fonts/glyphicons-halflings-regular.woff2') format('woff2'), 
+	  url('/resources/css/fonts/glyphicons-halflings-regular.woff') format('woff'), 
+	  url('/resources/css/fonts/glyphicons-halflings-regular.ttf') format('truetype'), 
+	  url('/resources/css/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+}
+
+@font-face {
+  font-family: 'NanumMyeongjo';
+  src: url('/resources/css/fonts/NanumMyeongjo.eot');
+  src: url(/resources/css/fonts/NanumMyeongjo.eot?#iefix) format('embedded-opentype'),
+       url(/resources/css/fonts/NanumMyeongjo.woff) format('woff'),
+       url(/resources/css/fonts/NanumMyeongjo.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'NanumMyeongjoBold';
+  src: url('/resources/css/fonts/NanumMyeongjoBold.eot');
+  src: url(/resources/css/fonts/NanumMyeongjoBold.eot?#iefix) format('embedded-opentype'),
+       url(/resources/css/fonts/NanumMyeongjoBold.woff) format('woff'),
+       url(/resources/css/fonts/NanumMyeongjoBold.ttf) format('truetype');
+}

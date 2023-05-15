@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qatv.qatvManage.nomManageDAO">	
+	
+	<sql id="searchQuery">
+		<if test="searchType == 'start' and searchTxt != null and searchTxt != ''">
+<!-- 			AND A.CHAR_VIET LIKE ''+#{searchTxt}+'%' -->
+			AND INSTR(A.CHAR_VIET, #{searchTxt}) = 1
+		</if>
+		<if test="searchType == 'text' and searchTxt != null and searchTxt != ''">
+			AND INSTR(A.CHAR_VIET, #{searchTxt}) > 0
+		</if>
+	</sql>
+			
+	<select id="getListCnt" resultType="int">
+		SELECT COUNT(*)
+		FROM nom_info A
+		WHERE 1=1
+		<include refid="searchQuery"/>
+	</select>
+	
+	<select id="getList" parameterType="map" resultType="HashMap">
+  		SELECT A.NOM_ID,
+  			A.NOM_CD,
+		    A.CHAR_UNI,
+		    A.CHAR_VIET,		    
+		    A.CHAR_DEF,
+		    A.FILE_ID,	
+		    B.FILE_NAME,
+		    B.FILE_PATH,	   
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM nom_info A
+		LEFT JOIN file_info B ON A.FILE_ID = B.FILE_ID
+		WHERE 1=1
+		<include refid="searchQuery"/>
+		ORDER BY A.CHAR_VIET
+		<if test="start_idx != null">
+		LIMIT ${start_idx}
+			<if test="end_idx != null">
+			, ${end_idx}
+			</if>
+		</if>
+	</select>
+	
+	
+	<select id="getMap" parameterType="map" resultType="HashMap">
+		SELECT A.NOM_ID,
+			A.NOM_CD,
+		    A.CHAR_UNI,
+		    A.CHAR_VIET,		   
+		    A.CHAR_DEF,		   
+		    A.FILE_ID,		 
+		    B.FILE_NAME,
+		    B.FILE_PATH,  
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM nom_info A
+		LEFT JOIN file_info B ON A.FILE_ID = B.FILE_ID
+		WHERE 
+		<if test="id != null">
+			A.NOM_ID = #{id}
+		</if>
+		<if test="code != null">
+			A.NOM_CD = #{code}
+		</if>
+	</select>
+	
+	<insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="NOM_ID" keyColumn="NOM_ID">
+	<!-- <![CDATA[]] -->
+		INSERT INTO nom_info
+			(
+			CHAR_VIET
+			, CHAR_UNI
+			, CHAR_DEF
+			<if test="FILE_ID != null and FILE_ID != ''">
+			, FILE_ID
+			</if>
+			<if test="USER_ID != null">
+			, RGST_USER
+			, MDFY_USER
+			</if>
+			)
+		VALUES(			
+			#{CHAR_VIET }
+			, #{CHAR_UNI }
+			, #{CHAR_DEF }
+			<if test="FILE_ID != null and FILE_ID != ''">
+			, #{FILE_ID }
+			</if>
+			<if test="USER_ID != null">
+			, #{USER_ID }
+			, #{USER_ID }
+			</if>
+		)
+
+	<!-- ]]> -->
+	</insert>
+	
+	<update id="update" parameterType="map">
+	<!-- <![CDATA[]] -->
+		UPDATE nom_info
+		SET
+		MDFY_DTTM = NOW()		
+		, NOM_CD = CONCAT('N',LPAD(NOM_ID, 8, '0'))
+		<if test="CHAR_UNI != null">
+		, CHAR_UNI = #{CHAR_UNI }
+		</if>
+		<if test="CHAR_VIET != null">
+		, CHAR_VIET = #{CHAR_VIET }
+		</if>
+		<if test="CHAR_DEF != null">		
+		, CHAR_DEF = #{CHAR_DEF }
+		</if>
+		<if test="FILE_ID != null">	
+		, FILE_ID = #{FILE_ID }
+		</if>
+		<if test="USER_ID != null">
+		, MDFY_USER = #{USER_ID }
+		</if>
+		WHERE NOM_ID = #{NOM_ID}
+				
+	<!-- ]]> -->
+	</update>
+	
+	<delete id="delete" parameterType="map">
+
+		DELETE FROM nom_info
+	    WHERE NOM_ID = #{id}
+
+	</delete>
+	
+
+</mapper>

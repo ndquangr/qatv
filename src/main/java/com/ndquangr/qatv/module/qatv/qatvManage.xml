@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qatv.qatvManage.qatvManageDAO">	
+	
+	<sql id="searchQuery">
+		<if test="searchType == 'start' and searchTxt != null and searchTxt != ''">
+<!-- 			AND A.CHAR_VIET LIKE ''+#{searchTxt}+'%' -->
+			AND INSTR(A.CHAR_VNF, #{searchTxt}) = 1
+		</if>
+		<if test="searchType == 'n_text' and searchTxt != null and searchTxt != ''">
+			AND INSTR(A.CHAR_VNF, #{searchTxt}) > 0
+		</if>
+		<if test="searchType == 'h_text' and searchTxt != null and searchTxt != ''">
+			AND INSTR(A.CHAR_HNF, #{searchTxt}) > 0
+		</if>
+		<!-- <if test="searchType == 'level' and searchTxt != null and searchTxt != ''">
+			AND A.CHAR_LVL = #{searchTxt}
+		</if> -->
+	</sql>
+			
+	<select id="getListCntQATV" resultType="int">
+		SELECT COUNT(*)
+		FROM qatv A
+		WHERE 1=1 AND A.CHAR_LVL = 0
+		<include refid="searchQuery"/>
+	</select>
+	
+	<select id="getListQATV" parameterType="map" resultType="HashMap">
+  		SELECT A.QATV_ID,
+		    A.CHAR_HANNOM,
+		    A.CHAR_VIET,
+		    A.CHAR_HNF,
+			A.CHAR_VNF,
+		    A.CHAR_TYPE,		    
+		    A.CHAR_DEF,
+		    A.NOTE,
+		    A.CHAR_LVL,
+		    A.CHAR_ORD,
+		    A.PRT_ID,
+		    B.CHAR_HANNOM AS PRT_HANNOM,
+		    B.CHAR_VIET AS PRT_VIET,		    
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM,
+            (SELECT GROUP_CONCAT(CHAR_VNF SEPARATOR ', ') FROM qatv WHERE PRT_ID = A.QATV_ID GROUP BY 'all') AS CHILDREN,
+            (SELECT GROUP_CONCAT(QATV_ID SEPARATOR ', ') FROM qatv WHERE PRT_ID = A.QATV_ID GROUP BY 'all') AS CHILDREN_ID
+		FROM qatv A
+		LEFT JOIN qatv B ON A.PRT_ID = B.QATV_ID
+		WHERE 1=1 AND A.CHAR_LVL = 0
+		<include refid="searchQuery"/>
+		ORDER BY A.CHAR_VIET, A.QATV_ID
+		<if test="start_idx != null">
+		LIMIT ${start_idx}
+			<if test="end_idx != null">
+			, ${end_idx}
+			</if>
+		</if>
+	</select>
+	
+	<select id="getChildren" parameterType="map" resultType="HashMap">
+  		SELECT A.QATV_ID,
+		    A.CHAR_HANNOM,
+		    A.CHAR_VIET,
+		    A.CHAR_HNF,
+			A.CHAR_VNF,
+		    A.CHAR_TYPE,
+		    A.CHAR_DEF,
+		    A.NOTE,
+		    A.CHAR_LVL,
+		    A.CHAR_ORD,
+		    A.PRT_ID,		    		   
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM qatv A
+		WHERE A.PRT_ID = #{id}
+		ORDER BY A.CHAR_ORD
+	</select>
+	
+	<select id="getMap" parameterType="map" resultType="HashMap">
+		SELECT A.QATV_ID,
+		    A.CHAR_HANNOM,
+		    A.CHAR_VIET,
+		    A.CHAR_HNF,
+			A.CHAR_VNF,
+		    A.CHAR_TYPE,
+		    A.CHAR_DEF,
+		    A.NOTE,
+		    A.CHAR_LVL,
+		    A.CHAR_ORD,
+		    A.PRT_ID,		    		   
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM qatv A
+		WHERE A.QATV_ID = #{id}
+
+	</select>
+	
+	<insert id="insertQATV" parameterType="map" useGeneratedKeys="true" keyProperty="QATV_ID" keyColumn="QATV_ID">
+	<!-- <![CDATA[]] -->
+		INSERT INTO qatv
+			(
+			CHAR_HANNOM
+			, CHAR_VIET
+			, CHAR_HNF
+			, CHAR_VNF
+			, CHAR_TYPE
+			, CHAR_DEF
+			, NOTE
+			, CHAR_LVL
+			, CHAR_ORD
+			, PRT_ID			
+			<if test="USER_ID != null">
+			, RGST_USER
+			, MDFY_USER
+			</if>
+			)
+		VALUES(			
+			#{CHAR_HANNOM }
+			, #{CHAR_VIET }
+			, #{CHAR_HNF }
+			, #{CHAR_VNF }
+			, #{CHAR_TYPE }
+			, #{CHAR_DEF }
+			, #{NOTE }
+			, #{CHAR_LVL }
+			, #{CHAR_ORD }
+			, #{PRT_ID }			
+			<if test="USER_ID != null">
+			, #{USER_ID }
+			, #{USER_ID }
+			</if>
+		)
+
+	<!-- ]]> -->
+	</insert>
+	
+	<update id="updateQATV" parameterType="map">
+	<!-- <![CDATA[]] -->
+		UPDATE qatv
+		SET
+		MDFY_DTTM = NOW()
+		, CHAR_HANNOM = #{CHAR_HANNOM }
+		, CHAR_VIET = #{CHAR_VIET }
+		, CHAR_HNF = #{CHAR_HNF }
+		, CHAR_VNF = #{CHAR_VNF }
+		, CHAR_TYPE = #{CHAR_TYPE }
+		, CHAR_DEF = #{CHAR_DEF }
+		, NOTE = #{NOTE }
+		, CHAR_LVL = #{CHAR_LVL }
+		, CHAR_ORD = #{CHAR_ORD }
+		, PRT_ID = #{PRT_ID }
+		<if test="USER_ID != null">
+		, MDFY_USER = #{USER_ID }
+		</if>
+		WHERE QATV_ID = #{QATV_ID}
+				
+	<!-- ]]> -->
+	</update>
+	
+	<delete id="deleteQATV" parameterType="map">
+
+		DELETE FROM qatv
+	    WHERE QATV_ID = #{id}
+
+	</delete>
+	
+	<delete id="deleteChildren" parameterType="map">
+
+		DELETE FROM qatv
+	    WHERE PRT_ID = #{id}
+
+	</delete>
+	
+
+</mapper>

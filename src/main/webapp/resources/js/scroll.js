@@ -1,0 +1,1 @@
+$('#container').scrollTop($('#container').prop('scrollWidth'));

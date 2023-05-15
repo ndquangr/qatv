@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qatv.qatvManage.fileManageDAO">	
+			
+	<select id="getListCnt" resultType="int">
+		SELECT COUNT(*)
+		FROM file_info A
+	</select>
+	
+	<select id="getList" parameterType="map" resultType="HashMap">
+  		SELECT A.NOM_ID,
+		    A.CHAR_UNI,
+		    A.CHAR_VIET,		    
+		    A.CHAR_DEF,
+		    A.FILE_ID,		   
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM file_info A
+	</select>
+	
+	
+	<select id="getMap" parameterType="map" resultType="HashMap">
+		SELECT A.FILE_ID,
+		    A.FILE_NAME,
+		    A.FILE_PATH,		   
+		    A.FILE_ORG_NAME,	
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM file_info A
+		WHERE A.FILE_ID = #{id}
+
+	</select>
+	
+	<insert id="insert" parameterType="map" useGeneratedKeys="true" keyProperty="FILE_ID" keyColumn="FILE_ID">
+	<!-- <![CDATA[]] -->
+		INSERT INTO file_info
+			(
+			FILE_NAME
+			, FILE_PATH
+			, FILE_ORG_NAME
+			<if test="USER_ID != null">
+			, RGST_USER
+			, MDFY_USER
+			</if>
+			)
+		VALUES(			
+			#{FILE_NAME }
+			, #{FILE_PATH }
+			, #{FILE_ORG_NAME }
+			<if test="USER_ID != null">
+			, #{USER_ID }
+			, #{USER_ID }
+			</if>
+		)
+
+	<!-- ]]> -->
+	</insert>
+	
+	<update id="update" parameterType="map">
+	<!-- <![CDATA[]] -->
+		UPDATE file_info
+		SET
+		MDFY_DTTM = NOW()
+		, FILE_NAME = #{FILE_NAME }
+		, FILE_PATH = #{FILE_PATH }		
+		, FILE_ORG_NAME = #{FILE_ORG_NAME }		
+		<if test="USER_ID != null">
+		, MDFY_USER = #{USER_ID }
+		</if>
+		WHERE FILE_ID = #{FILE_ID}
+				
+	<!-- ]]> -->
+	</update>
+	
+	<delete id="delete" parameterType="map">
+
+		DELETE FROM file_info
+	    WHERE FILE_ID = #{id}
+
+	</delete>
+	
+
+</mapper>

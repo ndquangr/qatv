@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="sysManage.memberManage.memberManageDAO">
+	<resultMap type="java.util.HashMap" id="result">
+		<result property="USER_ID" 			        column="USER_ID" />
+		<result property="USER_NM" 			        column="USER_NM" />
+		<result property="EML" 				        column="EML" />
+		<result property="TEL_NO1" 			        column="TEL_NO1" />
+		<result property="TEL_NO2" 			        column="TEL_NO2" />
+		<result property="TEL_NO3" 			        column="TEL_NO3" />
+		<result property="CLPN1" 			        column="CLPN1" />
+		<result property="CLPN2" 			        column="CLPN2" />
+		<result property="CLPN3" 			        column="CLPN3" />
+		<result property="POST_NO1" 		        column="POST_NO1" />
+		<result property="POST_NO2" 		        column="POST_NO2" />
+		<result property="ADDR" 			        column="ADDR" />
+		<result property="DETL_ADDR" 		        column="DETL_ADDR" />
+		<result property="NEWS_RECV_YN" 	        column="NEWS_RECV_YN" />
+		<result property="SMS_RECV_YN" 		        column="SMS_RECV_YN" />
+		<result property="NOTE_RECV_YN" 			column="NOTE_RECV_YN" />
+		<result property="OUT_MSG" 			        column="OUT_MSG" />
+		<result property="MEM_JOIN_DTTM" 	        column="MEM_JOIN_DTTM" />
+		<result property="INFO_MDFY_DTTM" 	        column="INFO_MDFY_DTTM" />
+		<result property="MEMB_DEL_YN" 		        column="MEMB_DEL_YN" />
+		<result property="IMG_FILE_BFRN_NM"         column="IMG_FILE_BFRN_NM" />
+		<result property="IMG_FILE_AFT_NM" 	        column="IMG_FILE_AFT_NM" />
+		<result property="BIRTH_DTTM" 		        column="BIRTH_DTTM" />
+		<result property="SEX" 				        column="SEX" />
+		<result property="INST_UNIQ_ID" 	        column="INST_UNIQ_ID" />
+		<result property="INST_NM" 			        column="INST_NM" />
+		<result property="PROJECT_CONT" 	        column="PROJECT_CONT" />
+		<result property="RGON"                     column="RGON" />
+		<result property="BLNG"                     column="BLNG" />
+		<result property="BLNG_TYPE"                column="BLNG_TYPE" />
+		<result property="ORG_CD"                   column="ORG_CD" />
+		<result property="ORG_NM"                   column="ORG_NM" />
+		<result property="PSTN_NM"                  column="PSTN_NM" />
+		<result property="FIELD_NM"                 column="FIELD_NM" />
+		<result property="USER_ROL"                 column="USER_ROL" />
+		<result property="PWD_ERR_CNT"                 column="PWD_ERR_CNT" />
+	</resultMap>
+	
+	<sql id="searchQuery">
+		<if test="searchType == 'user_nm' and searchTxt != null and searchTxt != ''">
+			AND INSTR(INFO.USER_NM, REPLACE(#{searchTxt}, ' ', '')) > 0
+		</if>
+		<if test="searchType == 'user_id' and searchTxt != null and searchTxt != ''">
+			AND INSTR(INFO.USER_ID, #{searchTxt}) > 0
+		</if>
+		<if test="searchType == 'eml' and searchTxt != null and searchTxt != ''">
+			AND INSTR(INFO.EML, #{searchTxt}) > 0
+		</if>
+		<if test="searchType == 'org_nm' and searchTxt != null and searchTxt != ''">
+			AND INSTR((SELECT  XMLAGG(XMLELEMENT(x,(SELECT ORG_NM FROM CMTN_ORG_INFO WHERE ORG_CD = T.ORG_CD)|| ',') ORDER BY T.ORG_CD).EXTRACT('//text()').GetStringVal() FROM CMTN_USER_ORG T WHERE T.USER_ID = INFO.USER_ID), #{searchTxt}) > 0
+		</if>
+		<if test="searchRol != null and searchRol != ''">
+			AND (SELECT COUNT(*) FROM CMTN_USER_ROL WHERE USER_ID = INFO.USER_ID AND ROL_MNG_ID = #{searchRol}) > 0
+		</if>
+	</sql>
+	
+	<select id="getUserDetails" parameterType="map" resultType="HashMap">
+		SELECT USER_ID, USER_NM, PWD, EML, MEMB_DEL_YN, PWD_ERR_CNT 
+        FROM CMTN_USER_INFO
+        WHERE PWD IS NOT NULL AND USER_ID = #{user_id}
+	</select>
+	
+	<select id="getListCnt" resultType="int">
+		SELECT COUNT(*)
+		FROM CMTN_USER_INFO INFO
+		WHERE 1=1
+		<include refid="searchQuery"/>
+	</select>
+	
+	<select id="getMemberList" parameterType="map" resultMap="result">
+  		SELECT * FROM (SELECT  
+					  INFO.USER_ID
+					, USER_NM
+					, EML
+					, CLPN1
+					, CLPN2
+					, CLPN3
+					, TEL_NO1
+					, TEL_NO2
+					, TEL_NO3
+					, FIELD_NM					
+					, BLNG
+					, MEM_JOIN_DTTM
+					, PWD_ERR_CNT
+                    , ROLE.ROL_MNG_ID
+                    , (SELECT ROL_MNG_NM FROM CMTN_ROL_INFO RI WHERE RI.ROL_MNG_ID = ROLE.ROL_MNG_ID) ROL_MNG_NM
+				FROM CMTN_USER_INFO INFO
+                JOIN CMTN_USER_ROL ROLE ON ROLE.USER_ID = INFO.USER_ID		
+                WHERE 1=1
+				<include refid="searchQuery"/>		
+				ORDER BY MEM_JOIN_DTTM DESC) A GROUP BY USER_NM
+  		LIMIT ${start_idx}, ${end_idx}
+	</select>
+	
+	<select id="getMember" parameterType="map" resultMap="result">
+		SELECT
+			  A.USER_ID
+			, A.USER_NM
+			, A.EML
+			, A.CLPN1
+			, A.CLPN2
+			, A.CLPN3
+			, A.TEL_NO1
+			, A.TEL_NO2
+			, A.TEL_NO3
+			, A.FIELD_NM
+		FROM
+		(
+			SELECT 
+				  USER_ID
+				, USER_NM
+				, EML
+				, CLPN1
+				, CLPN2
+				, CLPN3
+				, TEL_NO1
+				, TEL_NO2
+				, TEL_NO3
+				, FIELD_NM
+			FROM CMTN_USER_INFO INFO
+			WHERE USER_ID = #{user_id}
+		) A
+	</select>
+
+	<select id="getChargeMemberList" parameterType="map" resultMap="result">
+	SELECT
+		USER_ID
+		, USER_NM
+		, FC_GET_ORG_NM_BY_USER_ID(USER_ID) AS ORG_NM
+	FROM CMTN_USER_INFO 
+	WHERE USER_ID IN
+	(
+	<foreach item="items" index="index" collection="chrg_user_id" separator=",">
+	 #{items}
+	</foreach>
+	)
+	AND MEMB_DEL_YN = 'N'
+	ORDER BY USER_NM
+	</select>
+
+	<insert id="insert" parameterType="map">
+	<!-- <![CDATA[]] -->
+		INSERT INTO CMTN_USER_INFO
+		(
+			  USER_ID
+			<if test="user_nm != null">
+			, USER_NM
+			</if>
+			<if test="pwd != null">
+			, PWD
+			</if>
+			<if test="eml != null">
+			, EML
+			</if>
+			<if test="clpn1 != null">
+			, CLPN1
+			</if>
+			<if test="clpn2 != null">
+			, CLPN2
+			</if>
+			<if test="clpn3 != null">
+			, CLPN3
+			</if>
+			<if test="tel_no1 != null">
+			, TEL_NO1
+			</if>
+			<if test="tel_no2 != null">
+			, TEL_NO2
+			</if>
+			<if test="tel_no3 != null">
+			, TEL_NO3
+			</if>
+			<if test="fax_no1 != null">
+			, FAX_NO1
+			</if>
+			<if test="fax_no2 != null">
+			, FAX_NO2
+			</if>
+			<if test="fax_no3 != null">
+			, FAX_NO3
+			</if>
+			<if test="rgon != null">
+			, RGON
+			</if>
+			<if test="blng != null">
+			, BLNG
+			</if>
+			<if test="field_nm != null">
+			, FIELD_NM
+			</if>
+			, MEM_JOIN_DTTM
+		)
+		VALUES(
+			  #{user_id}
+			<if test="user_nm != null">
+			, #{user_nm}
+			</if>
+			<if test="pwd != null">
+			, #{pwd}
+			</if>
+			<if test="eml != null">
+			, #{eml}
+			</if>
+			<if test="clpn1 != null">
+			, #{clpn1}
+			</if>
+			<if test="clpn2 != null">
+			, #{clpn2}
+			</if>
+			<if test="clpn3 != null">
+			, #{clpn3}
+			</if>
+			<if test="tel_no1 != null">
+			, #{tel_no1}
+			</if>
+			<if test="tel_no2 != null">
+			, #{tel_no2}
+			</if>
+			<if test="tel_no3 != null">
+			, #{tel_no3}
+			</if>
+			<if test="fax_no1 != null">
+			, #{fax_no1}
+			</if>
+			<if test="fax_no2 != null">
+			, #{fax_no2}
+			</if>
+			<if test="fax_no3 != null">
+			, #{fax_no3}
+			</if>
+			<if test="rgon != null">
+			, #{rgon}
+			</if>
+			<if test="blng != null">
+			, #{blng}
+			</if>
+			<if test="pstn_cd != null">
+			, #{pstn_cd}
+			</if>
+			<if test="field_nm != null">
+			, #{field_nm}
+			</if>
+			, NOW()
+		)
+	<!-- ]]> -->
+	</insert>
+	
+	<update id="update" parameterType="map">
+	<!-- <![CDATA[]] -->
+		UPDATE CMTN_USER_INFO
+		SET
+			  USER_NM = #{user_nm}
+			<if test="eml != null">
+			, EML = #{eml}
+			</if>
+			<if test="tel_no1 != null">
+			, TEL_NO1 = #{tel_no1}
+			</if>
+			<if test="tel_no2 != null">
+			, TEL_NO2 = #{tel_no2}
+			</if>
+			<if test="tel_no3 != null">
+			, TEL_NO3 = #{tel_no3}
+			</if>
+			<if test="clpn1 != null">
+			, CLPN1 = #{clpn1}
+			</if>
+			<if test="clpn2 != null">
+			, CLPN2 = #{clpn2}
+			</if>
+			<if test="clpn3 != null">
+			, CLPN3 = #{clpn3}
+			</if>
+			<if test="fax_no1 != null">
+			, FAX_NO1 = #{fax_no1}
+			</if>
+			<if test="fax_no2 != null">
+			, FAX_NO2 = #{fax_no2}
+			</if>
+			<if test="fax_no3 != null">
+			, FAX_NO3 = #{fax_no3}
+			</if>
+			<if test="pwd != null and pwd != '' ">
+			, PWD = #{pwd}
+			</if>
+			<if test="post_no1 != null">
+			, POST_NO1 = #{post_no1}
+			</if>
+			<if test="post_no2 != null">
+			, POST_NO2 = #{post_no2}
+			</if>
+			<if test="addr != null">
+			, ADDR = #{addr}
+			</if>
+			<if test="detl_addr != null">
+			, DETL_ADDR = #{detl_addr}
+			</if>
+			<if test="news_recv_yn != null">
+			, NEWS_RECV_YN = #{news_recv_yn}
+			</if>
+			<if test="sms_recv_yn != null">
+			, SMS_RECV_YN = #{sms_recv_yn}
+			</if>
+			<if test="out_msg != null">
+			, OUT_MSG = #{out_msg}
+			</if>
+			, INFO_MDFY_DTTM = now()
+			<if test="memb_del_yn != null">
+			, MEMB_DEL_YN = #{memb_del_yn}
+			</if>
+			<if test="img_file_bfrn_nm != null">
+			, IMG_FILE_BFRN_NM = #{img_file_bfrn_nm}
+			</if>
+			<if test="img_file_aft_nm != null">
+			, IMG_FILE_AFT_NM = #{img_file_aft_nm}
+			</if>
+			<if test="birth_dttm != null">
+			, BIRTH_DTTM = #{birth_dttm}
+			</if>
+			<if test="sex != null">
+			, SEX = #{sex}
+			</if>
+			<if test="inst_uniq_id != null">
+			, INST_UNIQ_ID = #{inst_uniq_id}
+			</if>
+			<if test="project_cont != null">
+			, PROJECT_CONT = #{project_cont}
+			</if>
+			<if test="field_nm != null">
+			, FIELD_NM = #{field_nm}
+			</if>
+		WHERE USER_ID = #{user_id}
+	<!-- ]]> -->
+	</update>
+	
+	<delete id="delete" parameterType="map">
+		DELETE FROM CMTN_USER_INFO
+		WHERE USER_ID = #{user_id}
+	</delete>
+	
+	<select id="getProfileObjectMap" parameterType="map" resultType="HashMap">
+		SELECT 
+			  usr.USER_ID
+			, usr.USER_NM
+			, usr.PWD
+			, usr.EML
+			, usr.CLPN1
+			, usr.CLPN2
+			, usr.CLPN3
+			, usr.TEL_NO1
+			, usr.TEL_NO2
+			, usr.TEL_NO3
+			, usr.FAX_NO1
+			, usr.FAX_NO2
+			, usr.FAX_NO3
+			, usr.BLNG
+			, usr.BLNG_TYPE
+			, usr.SEX
+			, usr.BIRTH_DTTM
+			, usr.ROL_MNG_ID
+			, usr.IMG_FILE_BFRN_NM
+			, usr.IMG_FILE_AFT_NM
+			, usr.SMTECH_ID
+			, usr.FIELD_NM
+			, (SELECT ROL_MNG_NM FROM CMTN_ROL_INFO WHERE ROL_MNG_ID = usr.ROL_MNG_ID LIMIT 1) as ROL_MNG_NM
+		FROM
+			(
+			  SELECT
+					usr.USER_ID
+					, usr.USER_NM
+					, usr.PWD
+					, usr.EML
+					, usr.CLPN1 as CLPN1
+					, usr.CLPN2 as CLPN2
+					, usr.CLPN3 as CLPN3
+					, usr.TEL_NO1 as TEL_NO1
+					, usr.TEL_NO2 as TEL_NO2
+					, usr.TEL_NO3 as TEL_NO3
+					, usr.FAX_NO1 as FAX_NO1
+					, usr.FAX_NO2 as FAX_NO2
+					, usr.FAX_NO3 as FAX_NO3
+					, usr.BLNG
+					, usr.BLNG_TYPE
+					, usr.SEX
+					, usr.BIRTH_DTTM
+					, (SELECT ROL_MNG_ID FROM CMTN_USER_ROL rol WHERE rol.USER_ID = usr.USER_ID LIMIT 1) as ROL_MNG_ID
+					, usr.IMG_FILE_BFRN_NM
+					, usr.IMG_FILE_AFT_NM
+					, usr.SMTECH_ID
+					, usr.FIELD_NM					
+				FROM CMTN_USER_INFO usr
+				WHERE usr.USER_ID = #{user_id}
+			) usr
+	</select>
+
+	<select id="getProfileAuthList" parameterType="map" resultType="HashMap">
+		SELECT 
+			A.ROL_MNG_ID
+			,(SELECT ROL_MNG_NM FROM CMTN_ROL_INFO WHERE ROL_MNG_ID = A.ROL_MNG_ID) AS ROL_MNG_NM
+		FROM CMTN_USER_ROL A
+		WHERE A.USER_ID = #{user_id}
+	</select>
+	
+	<update id="updateProfile" parameterType="map">
+	<!-- <![CDATA[]] -->
+		UPDATE CMTN_USER_INFO
+		SET
+			INFO_MDFY_DTTM = now()
+			<if test="user_nm != null">
+			, USER_NM = #{user_nm}
+			</if>
+			<if test="pwd != null and pwd != ''">
+			, PWD = #{pwd}
+			</if>
+			, PWD_ERR_CNT = '0' <!-- 비밀번호 변경시 비밀번호 오류 초기화 -->
+			<if test="tel_no1 != null">
+			, TEL_NO1 = #{tel_no1}
+			</if>
+			<if test="tel_no2 != null">
+			, TEL_NO2 = #{tel_no2}
+			</if>
+			<if test="tel_no3 != null">
+			, TEL_NO3 = #{tel_no3}
+			</if>
+			<if test="fax_no1 != null">
+			, FAX_NO1 = #{fax_no1}
+			</if>
+			<if test="fax_no2 != null">
+			, FAX_NO2 = #{fax_no2}
+			</if>
+			<if test="fax_no3 != null">
+			, FAX_NO3 = #{fax_no3}
+			</if>
+			<if test="clpn1 != null">
+			, CLPN1 = #{clpn1}
+			</if>
+			<if test="clpn2 != null">
+			, CLPN2 = #{clpn2}
+			</if>
+			<if test="clpn3 != null">
+			, CLPN3 = #{clpn3}
+			</if>
+			<if test="blng != null">
+			, BLNG = #{blng}
+			</if>
+			<if test="rgon != null">
+			, RGON = #{rgon}
+			</if>
+			<if test="sex != null">
+			, SEX = #{sex}
+			</if>
+			<if test="birth_dttm != null">
+			, BIRTH_DTTM = #{birth_dttm}
+			</if>
+			<if test="img_file_bfrn_nm != null">
+			, IMG_FILE_BFRN_NM = #{img_file_bfrn_nm}
+			</if>
+			<if test="img_file_aft_nm != null">
+			, IMG_FILE_AFT_NM = #{img_file_aft_nm}
+			</if>
+			<if test="img_file_type != null">
+			, IMG_FILE_TYPE = #{img_file_type}
+			</if>
+			<if test="img_file_size != null">
+			, IMG_FILE_SIZE = #{img_file_size}
+			</if>
+			<if test="field_nm != null">
+			, FIELD_NM = #{field_nm}
+			</if>
+			<if test="blng_type != null">
+			, BLNG_TYPE = #{blng_type}
+			</if>
+			<if test="eml != null">
+			, EML = #{eml}
+			</if>
+		WHERE USER_ID = #{user_id}
+	<!-- ]]> -->
+	</update>
+	
+	<delete id="deleteProfile" parameterType="map">
+		DELETE FROM CMTN_USER_INFO
+		WHERE USER_ID = #{user_id}
+	</delete>
+	
+	<select id="getMemberFindList" parameterType="map" resultMap="result">
+		SELECT a.*
+             , FC_GET_ORG_NM_BY_USER_ID(a.USER_ID) AS ORG_NM_TEXT
+		  FROM CMTN_USER_INFO a
+		  <if test="searchTxt != null">
+		 WHERE a.USER_NM LIKE '%' || #{searchTxt} || '%' 
+		  </if>
+		 ORDER BY a.USER_NM
+	</select>
+
+	<update id="updatePwdErrCntUp" parameterType="map">
+		UPDATE CMTN_USER_INFO 
+		SET PWD_ERR_CNT = PWD_ERR_CNT + 1
+		WHERE USER_ID = #{user_id}
+			AND CAST(PWD_ERR_CNT AS INT) &lt; 9
+	</update>
+
+	<update id="updatePwdErrCnt" parameterType="map">
+		UPDATE CMTN_USER_INFO 
+		SET PWD_ERR_CNT = #{pwd_err_cnt}
+		WHERE USER_ID = #{user_id}
+	</update>
+
+</mapper>

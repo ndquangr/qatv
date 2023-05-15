@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qatv.qatvManage.searchManageDAO">	
+	
+	<sql id="searchQuery">
+		<if test="searchType == 'n_start' and searchTxt != null and searchTxt != ''">
+			AND INSTR(A.CHAR_VNF, #{searchTxt}) = 1
+		</if>
+		<if test="searchType == 'n_text' and searchTxt != null and searchTxt != ''">
+			AND INSTR(A.CHAR_VNF, #{searchTxt}) > 0
+		</if>
+		<if test="searchType == 'h_text' and searchTxt != null and searchTxt != ''">
+			AND INSTR(A.CHAR_HNF, #{searchTxt}) > 0
+		</if>
+		<if test="searchType == 'h_start' and searchTxt != null and searchTxt != ''">
+			AND INSTR(A.CHAR_HNF, #{searchTxt}) = 1
+		</if>		
+	</sql>
+			
+	<select id="getListCnt" resultType="int">
+		SELECT COUNT(*)
+		FROM qatv A
+		WHERE 1=1
+		<include refid="searchQuery"/>
+	</select>
+	
+	<select id="getList" parameterType="map" resultType="HashMap">
+  		SELECT A.QATV_ID,
+		    A.CHAR_HANNOM,
+		    A.CHAR_VIET,
+		    A.CHAR_HNF,
+			A.CHAR_VNF,
+		    A.CHAR_TYPE,		    
+		    A.CHAR_DEF,
+		    A.NOTE,
+		    A.CHAR_LVL,
+		    A.CHAR_ORD,
+		    A.PRT_ID,
+		    B.CHAR_HANNOM AS PRT_HANNOM,
+		    B.CHAR_VIET AS PRT_VIET,		    
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM,
+            (SELECT GROUP_CONCAT(CHAR_VNF SEPARATOR ', ') FROM qatv WHERE PRT_ID = A.QATV_ID GROUP BY 'all') AS CHILDREN,
+            (SELECT GROUP_CONCAT(QATV_ID SEPARATOR ', ') FROM qatv WHERE PRT_ID = A.QATV_ID GROUP BY 'all') AS CHILDREN_ID
+		FROM qatv A
+		LEFT JOIN qatv B ON A.PRT_ID = B.QATV_ID
+		WHERE 1=1
+		<include refid="searchQuery"/>
+		ORDER BY A.CHAR_VNF, A.QATV_ID
+		<if test="start_idx != null">
+		LIMIT ${start_idx}
+			<if test="end_idx != null">
+			, ${end_idx}
+			</if>
+		</if>
+	</select>
+	
+	<select id="getChildren" parameterType="map" resultType="HashMap">
+  		SELECT A.QATV_ID,
+		    A.CHAR_HANNOM,
+		    A.CHAR_VIET,
+		    A.CHAR_HNF,
+			A.CHAR_VNF,
+		    A.CHAR_TYPE,
+		    A.CHAR_DEF,
+		    A.NOTE,
+		    A.CHAR_LVL,
+		    A.CHAR_ORD,
+		    A.PRT_ID,		    		   
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM qatv A
+		WHERE A.PRT_ID = #{id}
+		ORDER BY A.CHAR_ORD
+	</select>
+	
+	<select id="getMap" parameterType="map" resultType="HashMap">
+		SELECT A.QATV_ID,
+		    A.CHAR_HANNOM,
+		    A.CHAR_VIET,
+		    A.CHAR_HNF,
+			A.CHAR_VNF,
+		    A.CHAR_TYPE,
+		    A.CHAR_DEF,
+		    A.NOTE,
+		    A.CHAR_LVL,
+		    A.CHAR_ORD,
+		    A.PRT_ID,		  
+		    B.CHAR_VIET AS PRT_CHAR_VIET,  		
+		    B.CHAR_HNF AS PRT_CHAR_HNF,  		   
+		    A.RGST_USER,
+		    A.RGST_DTTM,
+		    A.MDFY_USER,
+		    A.MDFY_DTTM
+		FROM qatv A
+		LEFT JOIN qatv B on B.QATV_ID = A.PRT_ID
+		WHERE A.QATV_ID = #{id}
+
+	</select>
+	
+
+</mapper>
